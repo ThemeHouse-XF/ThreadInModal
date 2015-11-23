@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="ThemeHouse_ThreadInModal" title="[⌂] Threads In Overlays" version_string="1.0.0" version_id="1447261019" url="http://xf.themehouse.io/" install_callback_class="ThemeHouse_Install" install_callback_method="install" uninstall_callback_class="ThemeHouse_Install" uninstall_callback_method="uninstall">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates>
+    <template title="th_option_template_threadinoverlay"><![CDATA[<xen:require js="js/themehouse/threadinoverlay/option.js" />
+<xen:controlunit label="{$preparedOption.title}" hint="{$preparedOption.hint}">
+	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+	<xen:html>
+		<ul>
+			<xen:foreach loop="$threads" key="$counter" value="$thread">
+			<li>
+				<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}]" value="{$thread.thread_id}" placeholder="{xen:phrase th_thread_id_threadinoverlay}" size="15" inputclass="ThreadInOverlayThreadId" id="ThreadInOverlayThread{$counter}" />
+				<span id="ThreadInOverlayThread{$counter}Info"><a href="{xen:link 'threads', $thread}" target="_blank">{xen:helper wordtrim, $thread.title, 25}</a></span>
+			</li>
+			</xen:foreach>
+		
+			<li class="ThreadInOverlayOptionListener">
+				<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$nextCounter}]" value="" placeholder="{xen:phrase th_thread_id_threadinoverlay}" size="15"/>
+			</li>
+		</ul>
+		
+		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+		{xen:raw $editLink}
+	</xen:html>
+</xen:controlunit>]]></template>
+  </admin_templates>
+  <admin_template_modifications/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="controller_pre_dispatch" execute_order="10" callback_class="ThemeHouse_Listener_ControllerPreDispatch" callback_method="controllerPreDispatch" active="1" hint="" description=""/>
+    <listener event_id="file_health_check" execute_order="10" callback_class="ThemeHouse_ThreadInModal_Listener_FileHealthCheck" callback_method="fileHealthCheck" active="1" hint="" description=""/>
+    <listener event_id="init_dependencies" execute_order="10" callback_class="ThemeHouse_Listener_InitDependencies" callback_method="initDependencies" active="1" hint="" description=""/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_ThreadInModal_Listener_LoadClass" callback_method="loadClassController" active="0" hint="XenForo_ControllerPublic_Thread" description="XenForo_ControllerPublic_Thread (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_ThreadInModal_Listener_LoadClass" callback_method="loadClassRoutePrefix" active="0" hint="XenForo_Route_Prefix_Threads" description="XenForo_Route_Prefix_Threads (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="ThemeHouse_ThreadInModal_Listener_LoadClass" callback_method="loadClassController" active="1" hint="" description="(For XenForo 1.1 and below)" compatibility_switch="1"/>
+    <listener event_id="load_class_route_prefix" execute_order="10" callback_class="ThemeHouse_ThreadInModal_Listener_LoadClass" callback_method="loadClassRoutePrefix" active="1" hint="" description="" compatibility_switch="1"/>
+    <listener event_id="template_post_render" execute_order="10" callback_class="ThemeHouse_ThreadInModal_Listener_TemplatePostRender" callback_method="templatePostRender" active="1" hint="" description=""/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups>
+    <group group_id="th_threadInOverlay" display_order="2000" debug_only="0"/>
+    <option option_id="th_threadInOverlay_threadIds" edit_format="callback" data_type="array" can_backup="1" validation_class="ThemeHouse_ThreadInModal_Option" validation_method="verifyOption">
+      <default_value/>
+      <edit_format_params>ThemeHouse_ThreadInModal_Option::renderOption</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="discussionOptions" display_order="9999"/>
+      <relation group_id="th_threadInOverlay" display_order="200"/>
+    </option>
+  </optiongroups>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="option_group_th_threadInOverlay" version_id="1371138329" version_string="1.0.0"><![CDATA[Threads in Overlay by ThemeHouse]]></phrase>
+    <phrase title="option_group_th_threadInOverlay_description" version_id="1371138329" version_string="1.0.0"><![CDATA[Options for the Threads in Overlay by ThemeHouse add-on.]]></phrase>
+    <phrase title="option_th_threadInOverlay_threadIds" version_id="1371138329" version_string="1.0.0"><![CDATA[Threads In Overlay]]></phrase>
+    <phrase title="option_th_threadInOverlay_threadIds_explain" version_id="1371138329" version_string="1.0.0"><![CDATA[Enter the thread ids (one per box) of the threads you want to display in overlay.]]></phrase>
+    <phrase title="th_thread_id_threadinoverlay" version_id="1" version_string="0.9"><![CDATA[Thread ID]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates>
+    <template title="th_thread_view_threadinoverlay" version_id="1371138329" version_string="1.0.0"><![CDATA[<xen:title>{$thread.title}{xen:helper pagenumber, $page}</xen:title>
+
+<xen:require css="thread_view.css" />
+<xen:require css="user_banners.css" />
+
+<div class="section overlayScroll">
+
+<form action="{xen:link 'threads', $thread}" method="post" class="primaryContent">
+
+	<ol class="messageList" id="messageList">
+		<xen:foreach loop="$posts" value="$post">
+			<xen:if is="{$post.message_state} == 'deleted'">
+				<xen:include template="post_deleted_placeholder" />
+			<xen:else />
+				<xen:include template="post" />
+			</xen:if>
+		</xen:foreach>
+		<xen:edithint template="attached_files" />
+	</ol>
+
+	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+
+</form>
+
+<xen:if hascontent="true">
+	<div class="pageNavLinkGroup">
+		<xen:contentcheck>
+			<xen:if is="{$canQuickReply}">
+				<xen:if is="{$postsRemaining}">
+					<div class="linkGroup">
+						<xen:if is="{$postsRemaining} == 1">
+							<a href="{xen:link threads, $thread, 'page={xen:calc "{$page} + 1"}'}" class="postsRemaining">{xen:phrase 1_more_message}...</a>
+						<xen:else />
+							<a href="{xen:link threads, $thread, 'page={xen:calc "{$page} + 1"}'}" class="postsRemaining">{xen:phrase x_more_messages, 'count={xen:number $postsRemaining}'}...</a>
+						</xen:if>
+					</div>
+				</xen:if>
+			<xen:else />
+				<div class="linkGroup">
+					<xen:if is="{$canReply}">
+						<a href="{xen:link 'threads/reply', $thread}" class="callToAction"><span>{xen:phrase reply_to_thread}</span></a>
+					<xen:elseif is="{$visitor.user_id}" />
+						({xen:phrase no_permission_to_reply})
+					<xen:else />
+						<label for="LoginControl"><a href="{xen:link login}" class="concealed">({xen:phrase log_in_or_sign_up_to_reply})</a></label>
+					</xen:if>
+				</div>
+			</xen:if>
+
+			<xen:pagenav link="threads" linkdata="{$thread}"
+				page="{$page}" perpage="{$postsPerPage}" total="{$totalPosts}"
+				unreadlink="{$unreadLink}"
+			/>
+		</xen:contentcheck>
+	</div>
+</xen:if>
+
+</div><xen:comment><div class="section overlayScroll"></xen:comment>]]></template>
+  </templates>
+  <public_template_modifications>
+    <modification template="footer" modification_key="th_copyrightNotice_threadInModal" description="Copyright notice for [⌂] Threads In Overlays" execution_order="1" enabled="1" action="callback">
+      <find><![CDATA[/{xen:phrase (?:xenforo|extra)_copyright}/]]></find>
+      <replace><![CDATA[ThemeHouse_Listener_InitDependencies::copyrightNotice]]></replace>
+    </modification>
+    <modification template="footer" modification_key="th_copyrightNotice_threadInOverlay" description="Copyright notice for Threads In Overlays by ThemeHouse" execution_order="1" enabled="1" action="callback">
+      <find><![CDATA[/{xen:phrase xenforo_copyright}/]]></find>
+      <replace><![CDATA[ThemeHouse_Listener_InitDependencies::copyrightNotice]]></replace>
+    </modification>
+  </public_template_modifications>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
